@@ -9,6 +9,26 @@ export interface WebSocketClientConfig {
 export type MessageHandler = (command: Command) => void;
 export type ConnectionHandler = () => void;
 
+// Module-initiated events flow opposite the command path: the module
+// ships a `BridgeEvent` to the server and waits on the matching
+// `BridgeEventResponse`. Currently used by the ChoiceSet prompt
+// intercept to hand pf2e's dialog-driven choices over to the
+// character-creator frontend.
+export interface BridgeEvent {
+  bridgeId: string;
+  type: string;
+  payload: unknown;
+}
+
+export interface BridgeEventResponse {
+  bridgeId: string;
+  success: boolean;
+  data?: unknown;
+  error?: string;
+}
+
+const BRIDGE_EVENT_TIMEOUT_MS = 5 * 60 * 1000;
+
 export interface WebSocketLike {
   readyState: number;
   send(data: string): void;
@@ -33,6 +53,10 @@ export class WebSocketClient {
   private connectHandler: ConnectionHandler | null = null;
   private disconnectHandler: ConnectionHandler | null = null;
   private isManualClose = false;
+  private readonly pendingBridgeEvents = new Map<
+    string,
+    { resolve: (data: unknown) => void; reject: (err: Error) => void; timer: ReturnType<typeof setTimeout> }
+  >();
 
   private readonly config: Required<WebSocketClientConfig>;
   private readonly createSocket: WebSocketFactory;
@@ -70,6 +94,28 @@ export class WebSocketClient {
     }
 
     this.socket.send(JSON.stringify(response));
+  }
+
+  // Ship a module-initiated event and wait on the matching bridge
+  // response keyed by bridgeId. Each in-flight request has a
+  // generous timeout so long-running frontend prompts don't reject
+  // prematurely, but the caller should still await the result with
+  // its own UI fallbacks.
+  sendEvent(type: string, payload: unknown): Promise<unknown> {
+    const socket = this.socket;
+    if (socket === null || socket.readyState !== WS_OPEN) {
+      return Promise.reject(new Error('WebSocket is not connected'));
+    }
+    const bridgeId = generateBridgeId();
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.pendingBridgeEvents.delete(bridgeId);
+        reject(new Error(`Bridge event '${type}' timed out after ${(BRIDGE_EVENT_TIMEOUT_MS / 1000).toString()}s`));
+      }, BRIDGE_EVENT_TIMEOUT_MS);
+      this.pendingBridgeEvents.set(bridgeId, { resolve, reject, timer });
+      const event: BridgeEvent = { bridgeId, type, payload };
+      socket.send(JSON.stringify(event));
+    });
   }
 
   onMessage(handler: MessageHandler): void {
@@ -119,6 +165,25 @@ export class WebSocketClient {
     try {
       const data = JSON.parse(event.data as string) as unknown;
 
+      // Responses to module-initiated bridge events carry a bridgeId
+      // distinct from the per-command id. Resolve the pending promise
+      // and return before falling through to the command path.
+      if (this.isBridgeEventResponse(data)) {
+        const pending = this.pendingBridgeEvents.get(data.bridgeId);
+        if (!pending) {
+          console.warn('Foundry API Bridge | Unknown bridgeId in response:', data.bridgeId.slice(0, 8));
+          return;
+        }
+        clearTimeout(pending.timer);
+        this.pendingBridgeEvents.delete(data.bridgeId);
+        if (data.success) {
+          pending.resolve(data.data);
+        } else {
+          pending.reject(new Error(data.error ?? 'Bridge event failed'));
+        }
+        return;
+      }
+
       if (!this.isValidCommand(data)) {
         console.error('Foundry API Bridge | Invalid command format:', data);
         return;
@@ -137,6 +202,12 @@ export class WebSocketClient {
 
     const obj = data as Record<string, unknown>;
     return typeof obj['id'] === 'string' && typeof obj['type'] === 'string' && 'params' in obj;
+  }
+
+  private isBridgeEventResponse(data: unknown): data is BridgeEventResponse {
+    if (typeof data !== 'object' || data === null) return false;
+    const obj = data as Record<string, unknown>;
+    return typeof obj['bridgeId'] === 'string' && typeof obj['success'] === 'boolean';
   }
 
   private scheduleReconnect(): void {
@@ -162,4 +233,10 @@ export class WebSocketClient {
       this.reconnectTimer = null;
     }
   }
+}
+
+function generateBridgeId(): string {
+  // Foundry runs in the browser where crypto.randomUUID is always
+  // available (https context), so keep this dep-free.
+  return crypto.randomUUID();
 }

@@ -102,6 +102,9 @@ export {
   getCompendiumsHandler,
   getCompendiumHandler,
   findInCompendiumHandler,
+  listCompendiumPacksHandler,
+  listCompendiumSourcesHandler,
+  getCompendiumDocumentHandler,
   findOrCreateFolderHandler,
 } from '@/commands/handlers/world';
 

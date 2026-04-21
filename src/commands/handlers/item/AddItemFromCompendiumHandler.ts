@@ -75,6 +75,18 @@ export async function addItemFromCompendiumHandler(params: AddItemFromCompendium
     itemData['system'] = system;
   }
 
+  if (params.systemOverrides !== undefined) {
+    const existingSystem = itemData['system'];
+    const system = (existingSystem as Record<string, unknown> | undefined) ?? {};
+    // Shallow merge only — callers intentionally pass a small set of
+    // top-level `system.*` fields (location, etc.) and nested
+    // overrides aren't in the current use case.
+    for (const [key, value] of Object.entries(params.systemOverrides)) {
+      system[key] = value;
+    }
+    itemData['system'] = system;
+  }
+
   const createdItems = await actor.createEmbeddedDocuments('Item', [itemData]);
 
   const createdItem = createdItems[0];
