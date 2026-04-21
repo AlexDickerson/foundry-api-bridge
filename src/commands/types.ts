@@ -104,7 +104,8 @@ export type CommandType =
   | 'capture-scene'
   | 'get-scene-background'
   | 'update-scene'
-  | 'get-combat-turn-context';
+  | 'get-combat-turn-context'
+  | 'fetch-asset';
 
 export interface RollDiceParams {
   formula: string;
@@ -1442,6 +1443,36 @@ export interface CombatTurnContext {
   asciiMap: string;
 }
 
+// Asset Proxy (cloud SPA -> Foundry local files via WS)
+//
+// The character-creator SPA is served from the MCP cloud server but
+// references Foundry assets by relative path (`systems/pf2e/icons/...`,
+// etc.). Those paths don't exist on the cloud server, so the SPA asks
+// the MCP server to fetch them; the MCP server hands the request to
+// the bridge, which fetches from its local Foundry (same-origin) and
+// returns the bytes base64-encoded.
+export interface FetchAssetParams {
+  /** Absolute URL path on Foundry - leading `/`, no host, no query. */
+  path: string;
+}
+
+export interface FetchAssetSuccess {
+  ok: true;
+  /** Foundry response's Content-Type, or 'application/octet-stream'. */
+  contentType: string;
+  /** Base64-encoded file bytes. */
+  bytes: string;
+}
+
+export interface FetchAssetError {
+  ok: false;
+  /** HTTP-ish status: 400 invalid path, 404 not found, 502 fetch failed. */
+  status: number;
+  error: string;
+}
+
+export type FetchAssetResult = FetchAssetSuccess | FetchAssetError;
+
 export type AbilityKey = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha';
 
 export const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -1540,6 +1571,7 @@ export interface CommandParamsMap {
   'get-scene-background': GetSceneBackgroundParams;
   'update-scene': UpdateSceneParams;
   'get-combat-turn-context': GetCombatTurnContextParams;
+  'fetch-asset': FetchAssetParams;
 }
 
 export interface CommandResultMap {
@@ -1634,4 +1666,5 @@ export interface CommandResultMap {
   'get-scene-background': GetSceneBackgroundResult;
   'update-scene': UpdateSceneResult;
   'get-combat-turn-context': CombatTurnContext;
+  'fetch-asset': FetchAssetResult;
 }

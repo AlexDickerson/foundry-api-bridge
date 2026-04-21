@@ -127,3 +127,6 @@ export {
   removeActorEffectHandler,
   updateActorEffectHandler,
 } from '@/commands/handlers/effect';
+
+// Asset proxy handler
+export { fetchAssetHandler, createFetchAssetHandler } from '@/commands/handlers/asset';
