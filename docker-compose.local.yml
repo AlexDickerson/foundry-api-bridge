@@ -1,0 +1,51 @@
+# Local development on a Docker Desktop host (typically the dev laptop).
+# Builds the image from the checked-out Dockerfile instead of pulling the
+# GHCR release, so changes to module sources show up after one
+# `docker compose -f docker-compose.local.yml up --build`. The bind mounts
+# on dist/ let you iterate without rebuilding the image: run
+# `npm run build` and `docker compose ... restart`.
+#
+# Data lives in a named volume so the same Compose file works on Windows,
+# macOS, and Linux without hard-coding host paths. Override FOUNDRY_DATA
+# in .env to a host path if you want the Foundry data directory exposed
+# on the filesystem (e.g. for backups or poking at user data directly).
+#
+# The MCP server runs separately (foundry-mcp repo). Point its
+# FOUNDRY_WS_URL at this container's websocket once you enable the module.
+
+services:
+  foundry-local:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: foundry-api-bridge:local
+    container_name: foundry-local
+    ports:
+      - '${FOUNDRY_PORT:-30000}:30000' # Foundry VTT
+    volumes:
+      # Named volume by default — portable across OSes. Override in .env
+      # with e.g. FOUNDRY_DATA=E:/TTRPG/foundry-local-data to use a host path.
+      - ${FOUNDRY_DATA:-foundry-data-local}:/data
+      # Live-reload bind mounts: rebuild module locally and
+      # changes appear in the container without rebuilding the image.
+      #
+      # The first dist mount keeps the staging path consistent with
+      # the baked image; the second mounts dist directly at the
+      # install path Foundry serves from, so edits to module.js are
+      # visible to the GM browser after a Ctrl+F5 — no container restart.
+      # SKIP_MODULE_COPY below tells docker-entrypoint.sh to skip its
+      # normal copy step (which would self-overwrite the bind mount).
+      - ./dist:/opt/foundry-api-bridge
+      - ./dist:/data/Data/modules/foundry-api-bridge
+    environment:
+      - FOUNDRY_USERNAME=${FOUNDRY_USERNAME}
+      - FOUNDRY_PASSWORD=${FOUNDRY_PASSWORD}
+      # Module is bind-mounted directly at the Foundry install path above;
+      # tell docker-entrypoint.sh not to cp on top of itself.
+      - SKIP_MODULE_COPY=1
+    restart: unless-stopped
+
+volumes:
+  foundry-data-local:
+    # Named volume, managed by Docker. Survives `docker compose down`;
+    # removed only with `docker compose down -v`.

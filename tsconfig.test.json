@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // ts-jest (v29+) checks each test file in isolation, which lets tsc infer
+    // rootDir from a single __tests__ subtree and emits TS5011. Pin rootDir
+    // to ./src so the calculation is stable regardless of which file is up.
+    "rootDir": "./src",
+    "types": ["@league-of-foundry-developers/foundry-vtt-types", "jest", "node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

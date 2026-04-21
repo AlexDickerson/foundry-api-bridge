@@ -1,0 +1,11 @@
+.git
+.github
+.claude
+.env
+*.md
+
+# Build outputs (rebuilt inside Docker)
+node_modules
+
+# Keep dist — we COPY static assets (module.json, styles, templates) from it
+# dist

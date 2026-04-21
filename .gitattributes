@@ -1,0 +1,12 @@
+# Shell scripts must use LF line endings regardless of the host OS —
+# CRLF breaks the shebang when the script runs inside a Linux container
+# (e.g. docker-entrypoint.sh failed with "env: 'bash\r': No such file or
+# directory" on Docker Desktop / Windows before this was added).
+*.sh text eol=lf
+
+# Dockerfiles and compose configs are also consumed by Linux-native
+# tooling — keep them LF for consistency even though most parsers accept
+# CRLF.
+Dockerfile text eol=lf
+docker-entrypoint.sh text eol=lf
+docker-compose*.yml text eol=lf

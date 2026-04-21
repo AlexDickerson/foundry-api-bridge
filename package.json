@@ -1,0 +1,37 @@
+{
+  "name": "foundry-api-bridge",
+  "version": "1.3.0",
+  "description": "Foundry VTT module that exposes a WebSocket command interface to a self-hosted MCP server. Forked from foundry-api-bridge with phone-home behaviour removed.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc --noEmit && vite build",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "all": "npm run lint && npm test && npm run build"
+  },
+  "keywords": [
+    "foundry-vtt",
+    "foundry",
+    "api",
+    "bridge",
+    "dnd",
+    "tabletop"
+  ],
+  "author": "AI DM Project",
+  "license": "MIT",
+  "devDependencies": {
+    "@league-of-foundry-developers/foundry-vtt-types": "^13.345.1",
+    "@types/jest": "^30.0.0",
+    "eslint": "^10.2.1",
+    "jest": "^30.3.0",
+    "ts-jest": "^29.4.9",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.58.2",
+    "vite": "^8.0.8"
+  }
+}

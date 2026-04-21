@@ -1,0 +1,14 @@
+services:
+  foundry-dev:
+    image: ghcr.io/alexdickerson/foundry-api-bridge:latest
+    container_name: foundry-dev
+    ports:
+      - '30001:30000' # Foundry VTT (dev)
+    volumes:
+      - ${FOUNDRY_DATA:-/home/alex/foundry-dev-data}:/data
+      # Mount dev builds over the baked-in image files
+      - ./dist:/opt/foundry-api-bridge
+    environment:
+      - FOUNDRY_USERNAME=${FOUNDRY_USERNAME}
+      - FOUNDRY_PASSWORD=${FOUNDRY_PASSWORD}
+    restart: unless-stopped

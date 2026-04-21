@@ -1,0 +1,12 @@
+services:
+  foundry:
+    image: ghcr.io/alexdickerson/foundry-api-bridge:latest
+    container_name: foundry
+    ports:
+      - '30000:30000' # Foundry VTT
+    volumes:
+      - ${FOUNDRY_DATA:-/home/alex/foundrydata}:/data
+    environment:
+      - FOUNDRY_USERNAME=${FOUNDRY_USERNAME}
+      - FOUNDRY_PASSWORD=${FOUNDRY_PASSWORD}
+    restart: unless-stopped
