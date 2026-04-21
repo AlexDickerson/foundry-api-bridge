@@ -3,6 +3,19 @@ name: Docker
 on:
   push:
     branches: [main]
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'docker-entrypoint.sh'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.npmrc'
+      - 'src/**'
+      - 'dist/**'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - '.github/workflows/docker.yml'
 
 jobs:
   build-and-push:
@@ -22,6 +35,7 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
+        if: github.event_name == 'push'
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -69,6 +83,7 @@ jobs:
           sarif_file: ${{ steps.grype.outputs.sarif }}
 
       - name: Push image
+        if: github.event_name == 'push'
         uses: docker/build-push-action@v7
         with:
           context: .
