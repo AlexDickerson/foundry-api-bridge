@@ -95,6 +95,7 @@ import {
   createRollTableHandler,
   updateRollTableHandler,
   deleteRollTableHandler,
+  fetchAssetHandler,
 } from '@/commands';
 
 const MODULE_VERSION = '7.7.0';
@@ -256,6 +257,9 @@ function initializeWebSocket(
   commandRouter.register('analyze-scene', analyzeSceneHandler);
   commandRouter.register('get-scene-background', getSceneBackgroundHandler);
   commandRouter.register('update-scene', updateSceneHandler);
+
+  // Asset proxy (cloud SPA asset fetch via WS)
+  commandRouter.register('fetch-asset', fetchAssetHandler);
 
   const wsConnectUrl = `${wsUrl}?apiKey=${encodeURIComponent(apiKey)}`;
   wsClient = new WebSocketClient({
