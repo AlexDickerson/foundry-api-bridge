@@ -7,7 +7,7 @@
 # -- Build: Foundry module --
 FROM node:20-alpine AS build-module
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json* .npmrc ./
 RUN npm ci
 COPY tsconfig.json vite.config.ts ./
 COPY src ./src
