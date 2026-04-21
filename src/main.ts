@@ -1,4 +1,5 @@
 import { ConfigManager } from '@/config/ConfigManager';
+import { installPromptInterception } from '@/creator/prompt-intercept';
 import { registerSettings, registerMenu, getWsUrl, getApiKey } from '@/settings/SettingsManager';
 import { WebSocketClient } from '@/transport';
 import {
@@ -27,6 +28,9 @@ import {
   getCompendiumsHandler,
   getCompendiumHandler,
   findInCompendiumHandler,
+  listCompendiumPacksHandler,
+  listCompendiumSourcesHandler,
+  getCompendiumDocumentHandler,
   findOrCreateFolderHandler,
   createJournalHandler,
   updateJournalHandler,
@@ -156,6 +160,9 @@ function initializeWebSocket(
   commandRouter.register('get-compendiums', getCompendiumsHandler);
   commandRouter.register('get-compendium', getCompendiumHandler);
   commandRouter.register('find-in-compendium', findInCompendiumHandler);
+  commandRouter.register('list-compendium-packs', listCompendiumPacksHandler);
+  commandRouter.register('list-compendium-sources', listCompendiumSourcesHandler);
+  commandRouter.register('get-compendium-document', getCompendiumDocumentHandler);
   commandRouter.register('find-or-create-folder', findOrCreateFolderHandler);
   commandRouter.register('get-scene', getSceneHandler);
   commandRouter.register('get-scenes-list', getScenesListHandler);
@@ -283,6 +290,8 @@ function initializeWebSocket(
         console.error('Foundry API Bridge | Command execution failed:', error);
       });
   });
+
+  installPromptInterception(wsClient);
 
   wsClient.connect();
 }
