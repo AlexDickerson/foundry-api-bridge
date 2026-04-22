@@ -1,8 +1,4 @@
-import type {
-  CompendiumDocumentData,
-  DumpCompendiumPackParams,
-  DumpCompendiumPackResult,
-} from '@/commands/types';
+import type { CompendiumDocumentData, DumpCompendiumPackParams, DumpCompendiumPackResult } from '@/commands/types';
 import type { FoundryPackMetadata } from './worldTypes';
 
 // Foundry's CompendiumCollection exposes getDocuments() which walks
@@ -40,9 +36,7 @@ function getGame(): FoundryGame {
 // Return every document in a pack as its serialized source form. Used
 // by the mcp-side compendium cache at warm-up time — lets the server
 // prime a full pack in one round-trip instead of N.
-export async function dumpCompendiumPackHandler(
-  params: DumpCompendiumPackParams,
-): Promise<DumpCompendiumPackResult> {
+export async function dumpCompendiumPackHandler(params: DumpCompendiumPackParams): Promise<DumpCompendiumPackResult> {
   const { packs } = getGame();
   if (!packs) {
     throw new Error('Foundry game.packs is not available');
