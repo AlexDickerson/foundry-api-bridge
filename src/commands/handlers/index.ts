@@ -105,6 +105,7 @@ export {
   listCompendiumPacksHandler,
   listCompendiumSourcesHandler,
   getCompendiumDocumentHandler,
+  dumpCompendiumPackHandler,
   findOrCreateFolderHandler,
 } from '@/commands/handlers/world';
 

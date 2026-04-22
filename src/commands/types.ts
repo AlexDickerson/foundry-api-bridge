@@ -93,6 +93,7 @@ export type CommandType =
   | 'list-compendium-packs'
   | 'list-compendium-sources'
   | 'get-compendium-document'
+  | 'dump-compendium-pack'
   | 'find-or-create-folder'
   | 'list-roll-tables'
   | 'get-roll-table'
@@ -1226,6 +1227,16 @@ export interface GetCompendiumDocumentResult {
   document: CompendiumDocumentData;
 }
 
+export interface DumpCompendiumPackParams {
+  packId: string; // e.g. 'pf2e.equipment-srd'
+}
+
+export interface DumpCompendiumPackResult {
+  packId: string;
+  packLabel: string;
+  documents: CompendiumDocumentData[];
+}
+
 /** Folder document types Foundry supports. The set mirrors
  *  CONST.FOLDER_DOCUMENT_TYPES in recent Foundry versions. */
 export type FolderDocumentType =
@@ -1559,6 +1570,7 @@ export interface CommandParamsMap {
   'list-compendium-packs': ListCompendiumPacksParams;
   'list-compendium-sources': ListCompendiumSourcesParams;
   'get-compendium-document': GetCompendiumDocumentParams;
+  'dump-compendium-pack': DumpCompendiumPackParams;
   'find-or-create-folder': FindOrCreateFolderParams;
   'list-roll-tables': ListRollTablesParams;
   'get-roll-table': GetRollTableParams;
@@ -1654,6 +1666,7 @@ export interface CommandResultMap {
   'list-compendium-packs': ListCompendiumPacksResult;
   'list-compendium-sources': ListCompendiumSourcesResult;
   'get-compendium-document': GetCompendiumDocumentResult;
+  'dump-compendium-pack': DumpCompendiumPackResult;
   'find-or-create-folder': FindOrCreateFolderResult;
   'list-roll-tables': RollTableSummary[];
   'get-roll-table': RollTableResult;
