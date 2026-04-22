@@ -76,7 +76,11 @@ export async function findInCompendiumHandler(params: FindInCompendiumParams): P
   const tokens = joinedQuery ? joinedQuery.split(/\s+/).filter((t) => t.length > 0) : [];
   const hasNameFilter = tokens.length > 0;
 
-  const limit = Math.max(1, Math.min(params.limit ?? 10, 100));
+  // Cap is sized so the mcp-side compendium cache can pull whole
+  // packs in one round-trip (pf2e.equipment-srd is the largest at
+  // ~5.6k items). The iteration below walks the pack index either
+  // way, so the cap only bounds response size, not server work.
+  const limit = Math.max(1, Math.min(params.limit ?? 10, 10_000));
 
   const requiredTraits = (params.traits ?? []).map((t) => t.toLowerCase()).filter((t) => t.length > 0);
   const hasTraitFilter = requiredTraits.length > 0;
