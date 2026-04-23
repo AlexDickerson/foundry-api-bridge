@@ -5,7 +5,7 @@
 # =============================================================================
 
 # -- Build: Foundry module --
-FROM node:20-alpine AS build-module
+FROM node:25-alpine AS build-module
 WORKDIR /app
 COPY package.json package-lock.json* .npmrc ./
 RUN npm ci
