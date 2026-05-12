@@ -27,11 +27,11 @@
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^13.345.1",
     "@types/jest": "^30.0.0",
-    "eslint": "^10.2.1",
-    "jest": "^30.3.0",
+    "eslint": "^10.3.0",
+    "jest": "^30.4.2",
     "ts-jest": "^29.4.9",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.58.2",
-    "vite": "^8.0.8"
+    "typescript-eslint": "^8.59.3",
+    "vite": "^8.0.12"
   }
 }
